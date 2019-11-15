@@ -10,9 +10,9 @@ def getAttrs(rel):
     """
     with open("../data/schemas.txt") as f:
         schemas = json.load(f);
-    print(schemas)
     for relName, atrName, type, pos in schemas:
         print(relName, atrName, type, pos)
+
 
 if __name__ == '__main__':
     getAttrs("suppliers")
