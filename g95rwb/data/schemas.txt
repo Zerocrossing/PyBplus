@@ -1,0 +1,1 @@
+[["Suppliers", "sid", "str", 0], ["Suppliers", "sname", "str", 1], ["Suppliers", "address", "str", 2], ["Products", "pid", "str", 0], ["Products", "pname", "str", 1], ["Products", "color", "str", 2], ["Supply", "sid", "str", 0], ["Supply", "pid", "str", 1], ["Supply", "cost", "int", 2]]
