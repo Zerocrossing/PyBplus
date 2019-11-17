@@ -2,7 +2,7 @@
 relalg.py
 Includes relational algebra functions
 """
-
+import bPlusTree
 def select(rel, att, op, val):
     """
     select(rel, att, op, val): Select tuples from relation rel which meet a select condition. The
@@ -11,6 +11,12 @@ def select(rel, att, op, val):
     operators, <, ≤, =, >, , and val is a value. Returns the name of the resulting relation. The
     schema for the resulting relation is identical to that for rel.
     """
+    tree = bPlusTree.getTree(rel,att)
+    cost = 0
+    if tree:
+        print("With tree the cost of selecting {} {} {} on {} is {}".format(att, op, val, rel, cost))
+    else:
+        print("Without tree the cost of selecting {} {} {} on {} is {}".format(att, op, val, rel, cost))
     pass
 
 def project(rel, attList):

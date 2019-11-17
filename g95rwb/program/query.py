@@ -12,14 +12,25 @@ e. For each supplier who supplied products with a cost of 47 or higher, list his
 product name and the cost.
 """
 import buildTree
+import display
 import remove
 import relAlg
 
 if __name__ == '__main__':
-    # question a
-    buildTree.build("suppliers", "sid", 2)
-    relAlg.select("suppliers", "att", "=", "s23")
-    # question b
-    remove.removeTree("suppliers", "sid")
-    relAlg.select("suppliers", "att", "=", "s23")
-    # question c
+    # Run build(*) on the provided data set, and create two B+_trees with an order of 2, one on
+    # Suppliers.sid, and the other on Supply.pid
+    suppliersTree = buildTree.build("Suppliers", "sid", 2)
+
+    # supplyTree = buildTree.build("Supply", "pid", 2)
+    # # Run displayTree(*) to display the structures of the two B+_trees you create under item 6
+    # # above. They should be displayed in files Suppliers_sid.txt and Supply_pid.txt, respectively,
+    # # under folder treePic
+    # display.displayTree(suppliersTree)
+    # display.displayTree(supplyTree)
+    # # question a
+    # buildTree.build("Suppliers", "sid", 2)
+    # relAlg.select("Suppliers", "att", "=", "s23")
+    # # question b
+    # remove.removeTree("Suppliers", "sid")
+    # relAlg.select("Suppliers", "att", "=", "s23")
+    # # question c
