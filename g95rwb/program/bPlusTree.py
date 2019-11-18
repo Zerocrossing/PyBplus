@@ -351,8 +351,18 @@ def printTree(rootPage, indent=0):
         children = [val for n, val in enumerate(keys) if n % 2 == 0]
         for child in children:
             printTree(child, indent + 1)
-    pass
 
+
+def deleteTree(nodePage):
+    node = getNode(nodePage)
+    keys = node.get("keys")
+    if node.get("isLeaf"):
+        indexPagePool.releasePage(nodePage)
+    else:
+        children = [val for n, val in enumerate(keys) if n % 2 == 0]
+        indexPagePool.releasePage(nodePage)
+        for child in children:
+            deleteTree(child)
 
 # endregion
 

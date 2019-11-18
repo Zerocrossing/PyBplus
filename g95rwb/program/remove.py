@@ -1,6 +1,8 @@
 """
 remove.py
 """
+import json
+import bPlusTree
 
 def removeTree(rel, att):
     """
@@ -8,7 +10,17 @@ def removeTree(rel, att):
     directory is deleted and all the pages occupied are returned to the page pool. If the
     B+_tree does not exist, do nothing
     """
-    pass
+    with open("../index/directory.txt") as f:
+        directory = json.load(f)
+        for drel, datt, page in directory:
+            if rel == drel and datt==att:
+                bPlusTree.deleteTree(page)
+                directory.remove([drel, datt, page])
+                break
+    with open("../index/directory.txt", 'w') as f:
+        json.dump(directory, f)
+
+
 
 def removeTable(rel):
     """

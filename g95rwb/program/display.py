@@ -1,7 +1,7 @@
 """
 display.py
 """
-
+import bPlusTree
 def displayTree(fname):
     """
     displayTree(fname): display the structure of the B+_tree with root file fname. The
@@ -10,7 +10,7 @@ def displayTree(fname):
     to plot a B+_tree like the ones plotted in the lecture notes. The looking can be similar to
     a nested directory hierarchy. Refer to the sample in Section 4.
     """
-    pass
+    bPlusTree.printTree(fname)
 
 def displayTable(rel, fname):
     """

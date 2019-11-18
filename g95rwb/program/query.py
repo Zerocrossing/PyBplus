@@ -15,22 +15,25 @@ import buildTree
 import display
 import remove
 import relAlg
+import indexPagePool
 
 if __name__ == '__main__':
+    # reset pools
+    indexPagePool.resetPool()
     # Run build(*) on the provided data set, and create two B+_trees with an order of 2, one on
     # Suppliers.sid, and the other on Supply.pid
     suppliersTree = buildTree.build("Suppliers", "sid", 2)
+    supplyTree = buildTree.build("Supply", "pid", 2)
+    # Run displayTree(*) to display the structures of the two B+_trees you create under item 6
+    # above. They should be displayed in files Suppliers_sid.txt and Supply_pid.txt, respectively,
+    # under folder treePic
 
-    # supplyTree = buildTree.build("Supply", "pid", 2)
-    # # Run displayTree(*) to display the structures of the two B+_trees you create under item 6
-    # # above. They should be displayed in files Suppliers_sid.txt and Supply_pid.txt, respectively,
-    # # under folder treePic
     # display.displayTree(suppliersTree)
     # display.displayTree(supplyTree)
-    # # question a
-    # buildTree.build("Suppliers", "sid", 2)
-    # relAlg.select("Suppliers", "att", "=", "s23")
-    # # question b
-    # remove.removeTree("Suppliers", "sid")
-    # relAlg.select("Suppliers", "att", "=", "s23")
-    # # question c
+
+    # question a
+    relAlg.select("Suppliers", "sid", "=", "s23")
+    # question b
+    remove.removeTree("Suppliers", "sid")
+    relAlg.select("Suppliers", "sid", "=", "s23")
+    # question c
