@@ -69,35 +69,47 @@ def addValToNode(valList, nodePage):
     """
     node = getNode(nodePage)
     nodeKeys = node["keys"]
-    print("adding {} to {} now has {} entries".format(valList, nodePage, len(nodeKeys)))
+    # print("adding {} to {} now has {} entries".format(valList, nodePage, len(nodeKeys)))
     newVal = valList[0]
     inserted = False
     # insert new value in appropriate place
     if node.get("isLeaf"):
-        print(nodePage, " is a leaf node")
-        for n in range(0, len(nodeKeys) // 3, 3):
+        # print(nodePage, " is a leaf node")
+        # print(nodeKeys)
+        for n in range(0, len(nodeKeys), 3):
             nodeVal = nodeKeys[n]
+            if newVal == nodeVal:
+                # print("Duplicate entry", valList)
+                # print("Existing entry", nodeKeys[n+1])
+                # add existing value to list
+                nodeKeys[n+1].append(valList[1][0])
+                nodeKeys[n+2].append(valList[2][0])
+                inserted = True
+                break
             if newVal < nodeVal:
+                # print("adding new value of {} in position {}".format(newVal, n))
                 for j in range(2, -1, -1):
                     nodeKeys.insert(n, valList[j])
                 inserted = True
                 break
         if not inserted:  # new value is largest, append to end
+            # print("adding new value of {} to the end".format(newVal))
             node["keys"].extend(valList)
     else:
-        print(nodePage, " is an internal node containing ", nodeKeys)
+        # print(nodePage, " is an internal node containing ", nodeKeys)
+        # print("To which we are adding ", valList)
         newPage = valList[1]
         for i in range(0, len(nodeKeys) - 1, 2):
             nodeVal = nodeKeys[i + 1]
             if newVal <= nodeVal:
-                nodeKeys.insert(i, newPage) #page
                 nodeKeys.insert(i, newVal) # val
+                nodeKeys.insert(i, newPage) #page
                 break
         else:
             node["keys"].append(newVal)
             node["keys"].append(newPage)
         # val is larger than the last val, extend list
-    print("After insertion node {} contains {}".format(nodePage, nodeKeys))
+    # print("After insertion node {} contains {}".format(nodePage, nodeKeys))
     writeNode(node, nodePage)
 
 
@@ -118,11 +130,33 @@ def partitionFullNodeValues(nodePage, order):
         return (lVals, midVals, rVals)
     # if the node is internal, the midval is just the singlular middle value
     else:
-        midPoint = len(keys) // 2
-        lVals = keys[0:midPoint]
-        rVals = keys[midPoint+1:]
-        midVals = keys[midPoint]
+        midPoint = (len(keys) // 2)+1
+        lVals = keys[0:midPoint+1]
+        rVals = keys[midPoint:]
+        midVals = keys[midPoint-1]
+        # rVals.insert(0, midVals)
+        # rVals.insert(0, lVals[-1])
+        print(lVals)
+        print(midVals)
+        print(rVals)
+        quit()
         return (lVals, midVals, rVals)
+
+def updateParentsofChildren(nodePage):
+    """
+    When a node splits its children need to be updated
+    by definition this node cannot be a leaf
+    """
+    node = getNode(nodePage)
+    if node.get("isLeaf"):
+        raise Exception("Attempting to update children of a leaf node")
+    for n, val in enumerate(node.get("keys")):
+        if n%2==0:
+            child = getNode(val)
+            child["parentPage"] = nodePage
+            writeNode(child, val)
+
+
 
 # endregion
 
@@ -143,6 +177,8 @@ class bPlusTree:
         :return: reference to the leaf page where the value was stored
         """
         # create root if this is first entry
+        dataPage = [dataPage]
+        entryNum = [entryNum]
         if self.root is None:
             keys = [val, dataPage, entryNum]
             node, indexPage = makeNode(isLeaf=True, keys=keys)
@@ -175,44 +211,54 @@ class bPlusTree:
         return self.findLeafForVal(val, keys[-1])
 
     def splitNode(self, nodePage):
-        print("Splitting", nodePage)
+        # print("Splitting", nodePage)
         if nodePage == self.root:
             self.splitRoot()
             return
         node = getNode(nodePage)
         if node.get("isLeaf"):
-            print(nodePage, "is a leaf...")
+            # print(nodePage, "is a leaf...")
             self.splitLeaf(nodePage)
             return
         else:
-            print(nodePage, "is internal")
             self.splitInternal(nodePage)
 
     def splitLeaf(self, nodePage):
         node = getNode(nodePage)
         # split node in half
+        print("\nSplitting node ", node)
         lVals, midVals, rVals = partitionFullNodeValues(nodePage, self.order)
         newNodeKeys = midVals + rVals
         # create new node, pair siblings
         parentPage = node.get("parentPage")
         rSibling = node.get("rSibling")
         newNode, newNodePage = makeNode(isLeaf=True, parentPage=parentPage, lSibling=nodePage, rSibling=rSibling, keys = newNodeKeys)
-        node["lSibling"] = newNodePage
+        node["rSibling"] = newNodePage
         node["keys"] = lVals
         # insert key into parent
         parentVals = [midVals[0], newNodePage]
         writeNode(node, nodePage)
         writeNode(newNode, newNodePage)
-        print("after Split {} contains {}".format(nodePage, node["keys"]))
-        print("new node {} contains {}".format(newNodePage, newNodeKeys))
+        # print("after Split {} contains {}".format(nodePage, node["keys"]))
+        # print("new node {} contains {}".format(newNodePage, newNodeKeys))
         addValToNode(parentVals, parentPage)
         if nodeOverfull(parentPage, self.order):
-            print("Split has caused parent to be overfull")
+            # print("Split has caused parent to be overfull")
             self.splitNode(parentPage)
 
     def splitInternal(self, nodePage):
-        print("Splitting the internal node ", nodePage)
-        quit()
+        node = getNode(nodePage)
+        # partition data
+        lVals, midVals, rVals = partitionFullNodeValues(nodePage, self.order)
+        print("L ", lVals)
+        print("M ", midVals)
+        print("R ", rVals)
+        # make new node, assign data split
+        newNode, newPage = makeNode(isLeaf=False, parentPage=node.get("parentPage"), keys=rVals)
+        node["keys"] = lVals
+        writeNode(node, nodePage)
+        # bubble up middle value to parent
+        addValToNode([midVals, newPage], node.get("parentPage"))
 
     def splitRoot(self):
         """
@@ -222,15 +268,17 @@ class bPlusTree:
         if root.get("isLeaf"):
             self.splitLeafRoot()
             return
-        print("Splitting a non-leaf root")
+        # print("Splitting a non-leaf root")
         lVals, midVals, rVals = partitionFullNodeValues(self.root, self.order)
-        print(lVals, midVals, rVals)
+        # print(lVals, midVals, rVals)
         # make 2 new pages
         leftNode, leftPage = makeNode(isLeaf= False, parentPage=self.root, keys = lVals)
         rightNode, rightPage = makeNode(isLeaf= False, parentPage=self.root, keys = rVals)
         # change root values
         root["keys"] = [leftPage, midVals, rightPage]
         writeNode(root, self.root)
+        updateParentsofChildren(leftPage)
+        updateParentsofChildren(rightPage)
 
     def splitLeafRoot(self):
         """
@@ -252,7 +300,7 @@ class bPlusTree:
         writeNode(lNode, lNodePage)
         writeNode(rNode, rNodePage)
         root["keys"] = [lNodePage, midVals[0], rNodePage]
-        print("Split root", root)
+        # print("Split root", root)
         writeNode(root, self.root)
 
 
@@ -268,6 +316,18 @@ def getTree(relName, keyAttr):
             return rootDir
     return False
 
+def printTree(rootPage, indent=0):
+    print(rootPage)
+    node = getNode(rootPage)
+    keys = node.get("keys")
+    if node.get("isLeaf"):
+        print("\t"*indent, keys)
+    else:
+        print("\t"*indent, keys)
+        children = [val for n, val in enumerate(keys) if n%2==0]
+        for child in children:
+            printTree(child, indent+1)
+    pass
 
 # endregion
 

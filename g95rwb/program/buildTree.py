@@ -50,4 +50,8 @@ def build(rel, att, od):
 
 if __name__ == '__main__':
     indexPagePool.resetPool()
-    build("Suppliers", "sid", 2)
+    print("Building Suppliers")
+    suppliersTree = build("Suppliers", "sid", 2)
+    # bPlusTree.printTree(suppliersTree)
+    # print("Building Supply")
+    # build("Supply", "pid", 2)
