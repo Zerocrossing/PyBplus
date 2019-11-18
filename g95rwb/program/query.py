@@ -32,8 +32,9 @@ if __name__ == '__main__':
     # display.displayTree(supplyTree)
 
     # question a
-    relAlg.select("Suppliers", "sid", "=", "s23")
+    relAlg.select("Supply", "sid", "<", "s23")
+
     # question b
-    remove.removeTree("Suppliers", "sid")
-    relAlg.select("Suppliers", "sid", "=", "s23")
+    # remove.removeTree("Suppliers", "sid")
+    # relAlg.select("Suppliers", "sid", "=", "s23")
     # question c

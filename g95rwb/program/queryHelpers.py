@@ -61,7 +61,39 @@ def scanTree(rootPage, val, op):
     eg) [("page11",0), ("page03", 1)] tells us that this value can be found on page 11, entry 0 and page 3 value 1
     will return False if no value is found
     """
-    pass
+    # start at root, find left or rightmost child depending
+    node = getNode(rootPage)
+    cost = 1
+    while(not node.get("isLeaf")):
+        if op[0] == "<":
+            nextPage = node.get("keys")[0]
+            node = getNode(nextPage)
+        else:
+            nextPage = node.get("keys")[-1]
+            node = getNode(nextPage)
+        cost+=1
+    if op[0] == "<":
+        nextSib = "rSibling"
+    else:
+        nextSib = "lSibling"
+    # perform a scan left or right (depending) until OP is no longer true
+    dataPages = []
+    while node is not None:
+        keys = node.get("keys")
+        for k in range(0, len(keys), 3):
+            nodeVal = keys[k]
+            result = doOp(nodeVal, val, op)
+            if not result:
+                return dataPages, cost
+            pageTuple = list(zip(keys[k + 1], keys[k + 2]))
+            dataPages.extend(pageTuple)
+        nextPage = node.get(nextSib)
+        if nextPage is None:
+            break
+        node = getNode(nextPage)
+        cost +=1
+    return dataPages, cost
+
 
 
 def writeRelation(relList, relName):

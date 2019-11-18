@@ -27,16 +27,16 @@ def select(rel, att, op, val):
             cost += searchCost
         # leq and geq
         else:
+            dataPages, searchCost = scanTree(treeRootPage, val, op)
             print("Less than or greater than search...")
         # we have a list of data pages and entry numbers, fetch the pages and write the data to the new relation
         for tuple in dataPages:
-            cost = cost+1
+            cost = cost + 1
             dataPage = tuple[0]
             entryNo = tuple[1]
-            with open("../data/{}/{}".format(rel,dataPage)) as f:
+            with open("../data/{}/{}".format(rel, dataPage)) as f:
                 data = json.load(f)[entryNo]
                 relation.append(data)
-
         print("With tree the cost of selecting {} {} {} on {} is {}".format(att, op, val, rel, cost))
     # No Tree
     else:
@@ -54,24 +54,22 @@ def select(rel, att, op, val):
             pages = json.load(f)
         # read pages, increase cost, do operation
         for page in pages:
-            cost +=1
+            cost += 1
             with open("../data/{}/{}".format(rel, page), 'r') as f:
                 data = json.load(f)
                 for tuple in data:
                     newVal = tuple[attNum]
-                    isValid = doOp(val,newVal,op)
+                    isValid = doOp(val, newVal, op)
                     if isValid:
                         relation.append(tuple)
         print("Without tree the cost of selecting {} {} {} on {} is {}".format(att, op, val, rel, cost))
-
     # we should have our relation now, write it
-    relname = "{}_{}_{}_{}".format(rel, att, op, val)
+    relname = "{}_{}_{}".format(rel, att, val)
     if treeRootPage:
-        relname+= "_with_tree"
+        relname += "_with_tree"
     else:
         relname += "_no_tree"
     writeRelation(relation, relname)
-
 
 
 def project(rel, attList):
@@ -81,7 +79,6 @@ def project(rel, attList):
     relation. The schema for the resulting relation is the set of attributes in attList.
     """
     pass
-
 
 
 def join(rel1, att1, rel2, att2):
