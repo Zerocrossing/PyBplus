@@ -57,7 +57,8 @@ def nodeOverfull(pageStr, order):
     # for internal nodes the size is the number of keys, which is (n-1)/2
     else:
         n = (len(node.get("keys")) - 1) // 2
-    return n > order * 2
+    res = n > order * 2
+    return res
 
 
 def addValToNode(valList, nodePage):
@@ -74,8 +75,6 @@ def addValToNode(valList, nodePage):
     inserted = False
     # insert new value in appropriate place
     if node.get("isLeaf"):
-        # print(nodePage, " is a leaf node")
-        # print(nodeKeys)
         for n in range(0, len(nodeKeys), 3):
             nodeVal = nodeKeys[n]
             if newVal == nodeVal:
@@ -199,9 +198,6 @@ class bPlusTree:
         # insertion may cause node to go over capacity
         if nodeOverfull(leafPage, self.order):
             self.splitNode(leafPage)
-        # print("Added {}, {}".format(val, dataPage))
-        # printTree(self.root)
-        # print("*" * 10)
 
     def findLeafForVal(self, val, nodePage):
         """
@@ -341,17 +337,30 @@ def getTree(relName, keyAttr):
     return False
 
 
-def printTree(rootPage, indent=0):
-    node = getNode(rootPage)
+def printTree(pageName, indent=0):
+    node = getNode(pageName)
     keys = node.get("keys")
+    outStr = ""
     if node.get("isLeaf"):
-        print("\t" * indent + rootPage + ", parent:", node.get("parentPage"),
-              " lsib:{}, rsib:{} ".format(node.get("lSibling"), node.get("rSibling")), keys)
+        leafStr = "{indent}{pgno}:'Leaf' {lSib} {rSib} {parent} {keys}\n".format(indent='\t' * indent, pgno=pageName,
+                                                                                 lSib=node.get("lSibling"),
+                                                                                 rSib=node.get("rSibling"),
+                                                                                 parent=node.get("parentPage"),
+                                                                                 keys=node.get("keys"))
+        outStr += leafStr
+        return outStr
+        # print("\t" * indent + rootPage + ", parent:", node.get("parentPage"),
+        #       " lsib:{}, rsib:{} ".format(node.get("lSibling"), node.get("rSibling")), keys)
     else:
-        print("\t" * indent + rootPage + ", par:", node.get("parentPage"), keys)
+        # print("\t" * indent + rootPage + ", par:", node.get("parentPage"), keys)
+        nodeStr = "{indent}{pgno}: 'Inner' {parent} {keys}\n".format(indent='\t' * indent, pgno=pageName,
+                                                                     parent=node.get("parentPage"),
+                                                                     keys=node.get("keys"))
+        outStr += nodeStr
         children = [val for n, val in enumerate(keys) if n % 2 == 0]
         for child in children:
-            printTree(child, indent + 1)
+            outStr += printTree(child, indent + 1)
+        return outStr
 
 
 def deleteTree(nodePage):
@@ -365,12 +374,4 @@ def deleteTree(nodePage):
         for child in children:
             deleteTree(child)
 
-
 # endregion
-
-if __name__ == '__main__':
-    indexPagePool.releasePage("pg02.txt")
-    # node, page = makeNode()
-    # node["isLeaf"] = True
-    # writeNode(node, page)
-    # print(json.dumps(node))

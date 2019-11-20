@@ -6,9 +6,10 @@ import bPlusTree
 import dataPagePool
 from queryHelpers import *
 import json
+import remove
 
 
-def select(rel, att, op, val, newRelName):
+def select(rel, att, op, val):
     """
     select(rel, att, op, val): Select tuples from relation rel which meet a select condition. The
     select condition is formed by att, op, and val, where att is an attribute in rel, op is one of
@@ -16,6 +17,8 @@ def select(rel, att, op, val, newRelName):
     operators, <, ≤, =, >, , and val is a value. Returns the name of the resulting relation. The
     schema for the resulting relation is identical to that for rel.
     """
+    dirName = "select_{}_{}_{}".format(rel, att, val)
+    remove.removeTable(dirName) # if the same operation is invoked we rewrite it
     treeRootPage = bPlusTree.getTree(rel, att)
     cost = 0
     relation = []
@@ -29,10 +32,9 @@ def select(rel, att, op, val, newRelName):
         # leq and geq
         else:
             dataPages, searchCost = scanTree(treeRootPage, val, op)
-            print("Less than or greater than search...")
+            cost+= searchCost
         # we have a list of data pages and entry numbers, fetch the pages and write the data to the new relation
         for tuple in dataPages:
-            cost = cost + 1
             dataPage = tuple[0]
             entryNo = tuple[1]
             with open("../data/{}/{}".format(rel, dataPage)) as f:
@@ -59,21 +61,13 @@ def select(rel, att, op, val, newRelName):
                 data = json.load(f)
                 for tuple in data:
                     newVal = tuple[attNum]
-                    isValid = doOp(val, newVal, op)
+                    isValid = doOp(newVal, val, op)
                     if isValid:
                         relation.append(tuple)
         print("Without tree the cost of selecting {} {} {} on {} is {}".format(att, op, val, rel, cost))
     # we should have our relation now, write it
-    relname = "select_{}_{}_{}".format(rel, att, val)
 
-    dirName = "select_{}_{}_{}".format(rel, att, val)
     makeRelation(relation, schema, dirName)
-    outputString = "Result of select {} {} {} on {} ".format(att, op, val, rel)
-    if treeRootPage:
-        outputString += " with tree:"
-    else:
-        outputString += " without tree:"
-    printRelation(relation, dirName, outputString)
     return dirName
 
 
@@ -84,7 +78,7 @@ def project(rel, attList):
     relation. The schema for the resulting relation is the set of attributes in attList.
     """
     # get the column numbers of the attributes
-    print("Projecting ", attList)
+    # print("Projecting ", attList)
     schema = getSchema(rel)
     projTupleSize = len(attList)
     # attMap maps attribute column numbers from the schema to the projection
@@ -99,20 +93,19 @@ def project(rel, attList):
     with open("../data/{}/pageLink.txt".format(rel)) as f:
         pages = json.load(f)
     for pageName in pages:
-        with open("../data/{}/{}".format(rel,pageName)) as f:
+        with open("../data/{}/{}".format(rel, pageName)) as f:
             page = json.load(f)
             for data in page:
-                proj = [None]*projTupleSize
+                proj = [None] * projTupleSize
                 for map in attMap:
                     proj[map[1]] = data[map[0]]
-                newRelation.append(proj)
-    newRelName = "project_{}_{}".format(rel, "_".join(attList))
+                if proj not in newRelation:
+                    newRelation.append(proj)
+    newRelName = "project_{}_onto_{}".format("_".join(attList), rel)
     outputString = "The result of projecting {} onto relation {}".format(" ".join(attList), rel)
     makeRelation(newRelation, schema, newRelName)
-    printRelation(newRelation, newRelName, outputString)
-
-
-
+    return newRelName
+    # printRelation(newRelation, newRelName, outputString)
 
 
 def join(rel1, att1, rel2, att2):
@@ -122,7 +115,7 @@ def join(rel1, att1, rel2, att2):
     the schemas for rel1 and rel2, minus either att1 or att2.
     """
     # check if a tree exists
-    print("Joining {} and {} on attributes {} and {}".format(rel1, rel2, att1, att2))
+    # print("Joining {} and {} on attributes {} and {}".format(rel1, rel2, att1, att2))
     lRel, lAtt = rel1, att1
     rRel, rAtt = rel2, att2
     lTree = bPlusTree.getTree(lRel, lAtt)
@@ -148,7 +141,7 @@ def join(rel1, att1, rel2, att2):
             break
     # if tree exists (is guaranteed to be right from above)
     if rTree:
-        #iter over left relation using pageLink
+        # iter over left relation using pageLink
         with open("../data/{}/pageLink.txt".format(lRel)) as f:
             leftPageNames = json.load(f)
         for leftPage in leftPageNames:
@@ -157,7 +150,7 @@ def join(rel1, att1, rel2, att2):
             for lTuple in lData:
                 searchVal = lTuple[lAttCol]
                 # can potentially find several results
-                results, cost = findEqualValueInTree(rTree,searchVal)
+                results, cost = findEqualValueInTree(rTree, searchVal)
                 if not results:
                     continue
                 for rPage, entryNo in results:
@@ -169,15 +162,29 @@ def join(rel1, att1, rel2, att2):
                     newRelation.append(result)
     # no tree
     else:
-        pass
+        with open("../data/{}/pageLink.txt".format(lRel)) as f:
+            leftPageNames = json.load(f)
+        for leftPage in leftPageNames:
+            with open("../data/{}/{}".format(lRel, leftPage), 'r') as f:
+                lData = json.load(f)
+            for lTuple in lData:
+                searchVal = lTuple[lAttCol]
+                # have to search naively through right table
+                with open("../data/{}/pageLink.txt".format(rRel)) as f:
+                    rightPageNames = json.load(f)
+                for rightPage in rightPageNames:
+                    with open("../data/{}/{}".format(rRel, rightPage), 'r') as f:
+                        rData = json.load(f)
+                        for rTuple in rData:
+                            if rTuple[rAttCol] == searchVal: # join candidate
+                                del rTuple[rAttCol]
+                                result = lTuple + rTuple
+                                newRelation.append(result)
     # delete duplicate attribute from r scheme and combine them
     del rSchema[rAttCol]
     newSchema = lSchema + rSchema
-    newRelName = "join_{}_{}_on_{}".format(lRel, rRel, lAtt)
+    newRelName = "{}_join_{}_on_{}".format(lRel, rRel, lAtt)
     outputString = "The result of joining relations {} and {} on attributes {} and {}".format(lRel, rRel, lAtt, rAtt)
-    print(newRelName)
     makeRelation(newRelation, newSchema, newRelName)
-    # printRelation(newRelation, newSchema, outputString)
-
-
-
+    return newRelName
+    # printRelation(newRelation, newRelName, outputString)

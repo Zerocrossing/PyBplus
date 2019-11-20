@@ -28,7 +28,7 @@ def getSchema(rel):
     return schema
 
 
-def findEqualValueInTree(nodePage, val, cost=0):
+def findEqualValueInTree(nodePage, val, cost=1):
     """
     searches a b+ tree for the value passed
     :return: a list of tuples of (dataPage, pageIndex) and the cost of the search
@@ -80,17 +80,19 @@ def scanTree(rootPage, val, op):
         nextSib = "lSibling"
     # perform a scan left or right (depending) until OP is no longer true
     dataPages = []
-    while node is not None:
+    notDone = True
+    while node is not None and notDone:
         keys = node.get("keys")
         for k in range(0, len(keys), 3):
             nodeVal = keys[k]
             result = doOp(nodeVal, val, op)
             if not result:
-                return dataPages, cost
+                notDone = False
+                continue
             pageTuple = list(zip(keys[k + 1], keys[k + 2]))
             dataPages.extend(pageTuple)
         nextPage = node.get(nextSib)
-        if nextPage is None:
+        if nextPage is None or not notDone:
             break
         node = getNode(nextPage)
         cost += 1
@@ -101,9 +103,11 @@ def printRelation(relList, relName, outputString):
     """
     writes the relation (presumed to be the result of a query) to queryOutput.txt
     """
+    out = outputString+'\n'
+    outFile = "../queryOutput/{}.txt".format(relName)
+    for relation in relList:
+        out += "\t".join([str(x) for x in relation]) + '\n'
     # todo actually append to queryResults or wherever
-    with open("../queryOutput/{}.txt".format(relName), 'w+') as f:
-        json.dump(relList, f)
 
 
 def makeRelation(relList, schema, relName, entriesPerPage=2):
@@ -172,3 +176,18 @@ def doOp(lVal, rVal, op):
     ‘<’, ‘<=’, ‘=’, ‘>’, ‘>=’
     """
     return funcs[op](lVal, rVal)
+    # return funcs[op](rVal, lVal)
+
+def resetQueries():
+    """
+    Deletes the contents of queryOutput
+    """
+    for fName in os.listdir("../queryOutput"):
+        os.remove("../queryOutput/{}".format(fName))
+
+def writeToQueryFile(string, fName = "../queryOutput/queryResult.txt"):
+    """
+    appends a simple string to the queryResult file
+    """
+    with open(fName, 'a+') as f:
+        f.write(string)

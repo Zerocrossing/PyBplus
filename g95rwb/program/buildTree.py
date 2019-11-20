@@ -5,6 +5,7 @@ import json
 import indexPagePool
 import bPlusTree
 
+
 def build(rel, att, od):
     """
     build(rel, att, od): build a B+ tree with an order of od on search key att of relation rel.
@@ -26,10 +27,10 @@ def build(rel, att, od):
     with open("../data/{}/pageLink.txt".format(rel), 'r') as f:
         leafPages = json.load(f)
     # iterate through the data pages, inserting the appropriate values into a new tree
-    tree = bPlusTree.bPlusTree(rel,att,od)
+    tree = bPlusTree.bPlusTree(rel, att, od)
     for pageName in leafPages:
         # read page
-        with open ("../data/{}/{}".format(rel, pageName)) as f:
+        with open("../data/{}/{}".format(rel, pageName)) as f:
             pageData = json.load(f)
             # pages can have multiple entries
             for entryNum, entry in enumerate(pageData):
@@ -46,13 +47,3 @@ def build(rel, att, od):
         json.dump(directory, f)
     # done, return root to new tree
     return tree.root
-
-
-if __name__ == '__main__':
-    indexPagePool.resetPool()
-    print("Building Suppliers")
-    suppliersTree = build("Suppliers", "sid", 2)
-    bPlusTree.printTree(suppliersTree)
-    print("Building Supply")
-    supplyTree = build("Supply", "pid", 2)
-    bPlusTree.printTree(supplyTree)

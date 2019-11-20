@@ -3,6 +3,7 @@ remove.py
 """
 import json
 import bPlusTree
+import os
 
 def removeTree(rel, att):
     """
@@ -28,4 +29,19 @@ def removeTable(rel):
     deleted and all the pages occupied are returned to the page pool. If the relation does not
     exist, do nothing
     """
-    pass
+    if os.path.isdir("../data/{}".format(rel)):
+        for fileName in os.listdir("../data/{}".format(rel)):
+            filePath = "../data/{}/{}".format(rel, fileName)
+            os.remove(filePath)
+        os.rmdir("../data/{}".format(rel))
+    with open("../data/schemas.txt", 'r') as f:
+        schema = json.load(f)
+    newSchema = []
+    for tuple in schema:
+        if tuple[0] == rel:
+            continue
+        else:
+            newSchema.append(tuple)
+    with open("../data/schemas.txt", 'w') as f:
+        json.dump(newSchema, f)
+

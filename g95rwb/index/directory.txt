@@ -1,1 +1,1 @@
-[["Suppliers", "sid", "pg00.txt"], ["Supply", "pid", "pg13.txt"]]
+[["Supply", "pid", "pg13.txt"]]

@@ -73,11 +73,11 @@ def resetPool():
     """
     returns the pool to it's default state
     """
-    for n in range(0, 99):
+    for n in range(0, 1000):
         fp = "../data/pg{:0>2d}.txt".format(n)
         if os.path.isfile(fp):
             os.remove(fp)
-    pool = ["pg{:0>3d}.txt".format(n) for n in range(99, -1, -1)]
+    pool = ["pg{:0>3d}.txt".format(n) for n in range(1000, -1, -1)]
     poolstr = json.dumps(pool)
     with open("../data/pagePool.txt", 'w') as f:
         f.write(poolstr)
