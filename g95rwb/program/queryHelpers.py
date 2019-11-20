@@ -4,6 +4,8 @@ as the name implies, these are subfunctions so that relAlg and query operations 
 """
 import json
 from bPlusTree import getNode
+import dataPagePool
+import os
 
 
 def getSchema(rel):
@@ -64,14 +66,14 @@ def scanTree(rootPage, val, op):
     # start at root, find left or rightmost child depending
     node = getNode(rootPage)
     cost = 1
-    while(not node.get("isLeaf")):
+    while (not node.get("isLeaf")):
         if op[0] == "<":
             nextPage = node.get("keys")[0]
             node = getNode(nextPage)
         else:
             nextPage = node.get("keys")[-1]
             node = getNode(nextPage)
-        cost+=1
+        cost += 1
     if op[0] == "<":
         nextSib = "rSibling"
     else:
@@ -91,14 +93,68 @@ def scanTree(rootPage, val, op):
         if nextPage is None:
             break
         node = getNode(nextPage)
-        cost +=1
+        cost += 1
     return dataPages, cost
 
 
-
-def writeRelation(relList, relName):
+def printRelation(relList, relName, outputString):
+    """
+    writes the relation (presumed to be the result of a query) to queryOutput.txt
+    """
+    # todo actually append to queryResults or wherever
     with open("../queryOutput/{}.txt".format(relName), 'w+') as f:
         json.dump(relList, f)
+
+
+def makeRelation(relList, schema, relName, entriesPerPage=2):
+    """
+    takes the result of a query and creates the directory structure
+    writes a new directory to /data/{relName}, overwriting if it exists
+    fills with pages containing entriesPerPage entries each
+    removes pages from the pagePool to do so
+    creates pageLink.txt in the directory
+    inserts the schema into schemas.txt
+    """
+    # make directory
+    dirName = "../data/{}".format(relName)
+    if os.path.exists(dirName):
+        for file in os.listdir(dirName):
+            os.remove("{}/{}".format(dirName, file))
+        os.rmdir(dirName)
+    os.mkdir(dirName)
+    # write data pages
+    pages = []
+    pageName = dataPagePool.getPage()
+    entryNo = 0
+    currentList = []
+    # add entries to currentList, flushing when full and requesting new page
+    for tuple in relList:
+        currentList.append(tuple)
+        entryNo += 1
+        if entryNo >= entriesPerPage:
+            pages.append(pageName)
+            with open("{}/{}".format(dirName, pageName), 'w+') as f:
+                json.dump(currentList, f)
+            pageName = dataPagePool.getPage()
+            currentList = []
+            entryNo = 0
+    # flush remaining entries if they exist
+    if currentList:
+        pages.append(pageName)
+        with open("{}/{}".format(dirName, pageName), 'w+') as f:
+            json.dump(currentList, f)
+    # make pageLink
+    with open("{}/pageLink.txt".format(dirName), 'w+') as f:
+        json.dump(pages, f)
+    # make schema
+    with open("../data/schemas.txt".format(dirName), 'r') as f:
+        schemas = json.load(f)
+    for n, tuple in enumerate(schema):
+        tuple.insert(0, relName)
+        tuple.append(n)
+        schemas.append(tuple)
+    with open("../data/schemas.txt".format(dirName), 'w') as f:
+        json.dump(schemas, f)
 
 
 funcs = {
@@ -116,4 +172,3 @@ def doOp(lVal, rVal, op):
     ‘<’, ‘<=’, ‘=’, ‘>’, ‘>=’
     """
     return funcs[op](lVal, rVal)
-

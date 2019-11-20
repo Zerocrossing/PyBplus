@@ -16,10 +16,13 @@ import display
 import remove
 import relAlg
 import indexPagePool
+import dataPagePool
 
 if __name__ == '__main__':
     # reset pools
     indexPagePool.resetPool()
+    dataPagePool.resetPool()
+    dataPagePool.resetData()
     # Run build(*) on the provided data set, and create two B+_trees with an order of 2, one on
     # Suppliers.sid, and the other on Supply.pid
     suppliersTree = buildTree.build("Suppliers", "sid", 2)
@@ -32,9 +35,12 @@ if __name__ == '__main__':
     # display.displayTree(supplyTree)
 
     # question a
-    relAlg.select("Supply", "sid", "<", "s23")
+    # relAlg.select("Suppliers", "sid", "=", "s23", "question_a")
 
     # question b
     # remove.removeTree("Suppliers", "sid")
     # relAlg.select("Suppliers", "sid", "=", "s23")
     # question c
+
+    # relAlg.project("Suppliers", ["sname", "address"])
+    relAlg.join("Suppliers", "sid", "Supply", "sid")

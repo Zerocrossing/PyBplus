@@ -108,8 +108,8 @@ def addValToNode(valList, nodePage):
                 # print("#"*25)
                 # print("New val of {} is less than {}, inserting {} into pos {}".format(newVal, nodeVal, newPage, i))
                 # print("Keys before insertion: ", nodeKeys)
-                nodeKeys.insert(i+1, newPage)  # page
-                nodeKeys.insert(i+1, newVal)  # val
+                nodeKeys.insert(i + 1, newPage)  # page
+                nodeKeys.insert(i + 1, newVal)  # val
                 break
         else:
             node["keys"].append(newVal)
@@ -345,7 +345,8 @@ def printTree(rootPage, indent=0):
     node = getNode(rootPage)
     keys = node.get("keys")
     if node.get("isLeaf"):
-        print("\t" * indent + rootPage + ", parent:", node.get("parentPage")," lsib:{}, rsib:{} ".format(node.get("lSibling"), node.get("rSibling")), keys)
+        print("\t" * indent + rootPage + ", parent:", node.get("parentPage"),
+              " lsib:{}, rsib:{} ".format(node.get("lSibling"), node.get("rSibling")), keys)
     else:
         print("\t" * indent + rootPage + ", par:", node.get("parentPage"), keys)
         children = [val for n, val in enumerate(keys) if n % 2 == 0]
@@ -363,6 +364,7 @@ def deleteTree(nodePage):
         indexPagePool.releasePage(nodePage)
         for child in children:
             deleteTree(child)
+
 
 # endregion
 
