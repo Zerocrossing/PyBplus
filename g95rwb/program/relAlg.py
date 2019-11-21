@@ -78,7 +78,6 @@ def project(rel, attList):
     relation. The schema for the resulting relation is the set of attributes in attList.
     """
     # get the column numbers of the attributes
-    # print("Projecting ", attList)
     schema = getSchema(rel)
     projTupleSize = len(attList)
     # attMap maps attribute column numbers from the schema to the projection
@@ -105,7 +104,6 @@ def project(rel, attList):
     outputString = "The result of projecting {} onto relation {}".format(" ".join(attList), rel)
     makeRelation(newRelation, schema, newRelName)
     return newRelName
-    # printRelation(newRelation, newRelName, outputString)
 
 
 def join(rel1, att1, rel2, att2):
@@ -115,7 +113,6 @@ def join(rel1, att1, rel2, att2):
     the schemas for rel1 and rel2, minus either att1 or att2.
     """
     # check if a tree exists
-    # print("Joining {} and {} on attributes {} and {}".format(rel1, rel2, att1, att2))
     lRel, lAtt = rel1, att1
     rRel, rAtt = rel2, att2
     lTree = bPlusTree.getTree(lRel, lAtt)
@@ -187,4 +184,3 @@ def join(rel1, att1, rel2, att2):
     outputString = "The result of joining relations {} and {} on attributes {} and {}".format(lRel, rRel, lAtt, rAtt)
     makeRelation(newRelation, newSchema, newRelName)
     return newRelName
-    # printRelation(newRelation, newRelName, outputString)

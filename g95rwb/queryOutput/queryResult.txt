@@ -1,0 +1,59 @@
+Query a) Find the name for the supplier 's23' when a B+_tree exists on Suppliers.sid:
+|Walsh	
+
+Query b) Find the name for the supplier 's23' without a B+ tree:
+|Walsh	
+
+Query c) Find the address of the suppliers who supplied 'p15':
+|12 Water Street	
+|3 Elizabeth Ave	
+|20 Scott Street	
+|100 Main Road	
+|72 Burton Street	
+|3 Cabot Street	
+|5 Water Street	
+|20 Young Ave	
+|90 Fox Ave	
+|30 Hunt Place	
+|3 Torbay Road	
+|5 First Street	
+|21 Ridge Road	
+|55 Elizabeth Ave	
+|70 Eric Street	
+|5 Central Street	
+|21 Queens Road	
+|4 Croucher Circle	
+|1 Greenspond Drive	
+|70 Forest Road	
+|43 Empire Ave	
+|130 Topsail Road	
+|20 Cashin Ave	
+|233 Kelly Drive	
+
+Query d) What is the cost of 'p20' supplied by 'Kiddie'?:
+|28.82	
+
+Query e) For each supplier who supplied products with a cost of 47 or higher, list his/her name, product name and the cost:
+|Brown	|shovel	|48.78	
+|Brown	|grill	|49.85	
+|Wang	|siding	|49.39	
+|Carew	|paint	|48.57	
+|Carew	|air conditioner	|49.55	
+|Carter	|vacuum	|47.3	
+|Evoy	|matherboard	|49.26	
+|Evans	|switch	|47.3	
+|Lee	|fan	|47.81	
+|Carter	|screwdriver	|47.27	
+|kielly	|kettle	|48.01	
+|Zhang	|flashlight	|49.45	
+|Edward	|matherboard	|49.01	
+|Edward	|monitor	|47.62	
+|Newwll	|air conditioner	|49.66	
+|Hayley	|usb	|47.42	
+|Hayley	|flashlight	|49.62	
+|Hayley	|switch	|48.76	
+|Kiddie	|usb	|47.12	
+|Kiddie	|sander	|47.69	
+|Kieley	|matherboard	|47.03	
+|Kieley	|chair	|48.15	
+|Walsh	|sofa	|48.82	

@@ -57,9 +57,7 @@ def removePages(pageList):
     with open("../index/pagePool.txt", 'r') as f:
         line = f.readline()
         pool = json.loads(line)
-    print(pool)
     for page in pageList:
-        print("Removing page: ", page)
         pool.remove(page)
     with open("../index/pagePool.txt", 'w') as f:
         f.write(json.dumps(pool))
